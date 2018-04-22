@@ -5,10 +5,10 @@
 class B
  {
    int jf()
-	  {
-		return bb;  
-	  }
-	  int bb;
+   {
+    return bb;  
+   }
+   int bb;
  }
 int _tmpfun(int a1,int a2)
 {
@@ -19,7 +19,7 @@ int _tmpfun(int a1,int a2)
 int main()
 {
   B _tmpb;
-  _tmpb.k=2;
+  _tmpb.bb=2;
 
   int __b=_tmpb.jf();
 
