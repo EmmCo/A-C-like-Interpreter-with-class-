@@ -1,7 +1,5 @@
 # A-C-like-Interpreter-with-class-
- 
-//这是一个的类C动态脚本的测试用例
-
+ ```C++
 class B
  {
    int jf()
@@ -18,13 +16,11 @@ int _tmpfun(int a1,int a2)
 
 int main()
 {
-  B _tmpb;
-  _tmpb.bb=2;
+   B _tmpb;
+   _tmpb.bb=2;
 
   int __b=_tmpb.jf();
-
-  //int kkkk =_tmpb.jf().dd().d.d().d();
-  //float _t=0.004;
+ 
   string str = "我就是一个字符串";
   int kl;
   int count = 5;
@@ -48,3 +44,5 @@ int main()
   }
  /* int i = 1+(2+3)*3/2-1|3&4|5<=3;*/
 }
+
+```
