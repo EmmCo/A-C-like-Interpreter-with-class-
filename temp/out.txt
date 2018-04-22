@@ -1,0 +1,68 @@
+.fundefine._global._tmpfunintint
+.int a1
+.int a2
+argend
+store a1
+store a2
+.int lll
+.int kkk
+.functionend ._global._tmpfunintint
+.fundefine._global._sTaRtmain
+argend
+push 我就是一个字符串
+.string str
+store str
+.int kl
+push 5
+.int count
+store count
+push 0
+.int sum
+store sum
+.bool isGoing
+call 
+push 2
+push 1
+callfun ._global._tmpfunintint
+store _fun_implicit_tmpfun
+load str
+push sss
+equal
+if
+push 9
+negative
+store kl
+otherwise
+push 1
+push 2
+add
+push 3
+push 4
+times
+add
+push 9
+add
+push 10
+push 5
+division
+minus
+store kl
+end
+while
+load count
+push 0
+g
+then
+load sum
+load count
+add
+store sum
+load count
+push 1
+minus
+store count
+push true
+store isGoing
+end
+.functionend ._global._sTaRtmain
+.fileend
