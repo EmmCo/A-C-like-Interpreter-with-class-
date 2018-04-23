@@ -1,48 +1,12 @@
 # A-C-like-Interpreter-with-class-
- ```C++
-class B
- {
-   int jf()
-   {
-    return bb;  
-   }
-   int bb;
- }
-int _tmpfun(int a1,int a2)
-{
-  int lll;
-  int kkk;
-}
+IDE-- MicroSoft Visual Studio 2013
 
-int main()
-{
-   B _tmpb;
-   _tmpb.bb=2;
+This is a interpreter based on C but with class, input source code interpretation and execution, use DFA to construct lexical analyzer to get word Token, then use recursive descent method to generate syntax analysis tree, and then generate target assembler code by type check, and finally get the final calculation result by the stack machine analysis target assembly code.The memory manager is used for memory allocation, and memory allocation records are output. Mark&Sweep is used to garbage collect.
 
-  int __b=_tmpb.jf();
+- [ ] 支持以 PDF 格式导出文稿
+- [ ] 改进 Cmd 渲染算法，使用局部渲染技术提高渲染效率
+- [x] 新增 Todo 列表功能
+- [x] 修复 LaTex 公式渲染问题
+- [x] 新增 LaTex 公式编号功能
+
  
-  string str = "我就是一个字符串";
-  int kl;
-  int count = 5;
-  int sum = 0;
-  bool isGoing;
-  _tmpfun(1,2);
-  if(str=="sss") //if 语句测试
-  {
-	kl=-9; 
-  }
-  else
-  {
-     kl = 1+2+3*4+9-10/5;
-  }
-
-  while(count>0)//while 语句测试
-  {
-   sum = sum + count ;
-   count = count -1;  
-   isGoing=true;
-  }
- /* int i = 1+(2+3)*3/2-1|3&4|5<=3;*/
-}
-
-```
