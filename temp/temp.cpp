@@ -420,20 +420,28 @@ long long  kkk(int k)
 	return 2;
 }
 
+class AA{
 
- 
+public:
+	AA(const AA& r)
+	{
+		cout << "con" << endl;
+	}
+	AA()
+	{
+	
+	}
+};
 
- 
+AA l( AA a)
+{
+	return a;
+}
 
 
 int
 main(int argc, char **argv)
 {
-	unsigned int kjkj = 25u-50;
-	 
-	//char kjkj[3] = {'2'};
-	//int jkj = sizeof(kjkj);
-
 	allocator<int>all;
 	double time = 0;
 	double counts = 0;
@@ -478,15 +486,10 @@ main(int argc, char **argv)
 	{
 		string Typename = memoryit->first;
 		string Typevalue = memoryit->second;
-		Type type = typecheck->stackTable.top()[Typename];
+		string type = typecheck->stackTable.top()[Typename];
 		
 		string stype="Unknown";
-		if (type == Type::_Bool)
-			stype = "bool";
-		if (type == Type::_Int)
-			stype = "int";
-		if (type == Type::_Str)
-			stype = "string";
+		 
 		cout << "\t"+Typename + "\t\t" + stype + "\t\t" + Typevalue << endl;
 	}
 

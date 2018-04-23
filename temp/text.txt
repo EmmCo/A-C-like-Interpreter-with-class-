@@ -4,8 +4,10 @@ class B
  {
    int jf()
 	  {
-	    int ll;
+		//return bb;  
+		int jj;
 	  }
+	  int ba;
  }
 /*
 class A extend B
@@ -25,14 +27,17 @@ bool sd;
  */
 int _tmpfun(int a1,int a2)
 {
-  int lll;
-  int kkk;
+  //return a1+a2;
+  int jj;
 }
-
+B _tmpb2;
+ 
 int main()
 {
   B _tmpb;
-  _tmpb.k.k.k=2;
+  _tmpb2.ba=2;
+
+  int __b=_tmpb.jf();
 
   //int kkkk =_tmpb.jf().dd().d.d().d();
   //float _t=0.004;
@@ -41,9 +46,7 @@ int main()
   int count = 5;
   int sum = 0;
   bool isGoing;
-
   _tmpfun(1,2);
-
   if(str=="sss") //if ”Ôæ‰≤‚ ‘
   {
 	kl=-9; 

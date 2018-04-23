@@ -21,9 +21,22 @@ enum Type //定义
 	_Int, _Bool, _Str, _Void, _Class, _Float, _Unknown, _Fun, _ClassFun, _Object
 };
 
+
+static string TypeString(Type _type)
+{
+	switch (_type)
+	{
+	case Type::_Int:
+		return "int";
+
+	}
+	
+
+}
+
 typedef stack<map<string, Type>  > StackSymbolTable;
 
-typedef std::map<string, Type>      SymbolTable ;
+typedef std::map<string, string>      SymbolTable ;
 
  
 class Judge :public MemoryTool
@@ -45,6 +58,8 @@ public:
 	virtual ~Judge()
 	{
 	}
+
+	Type returntype;
 };
 //  +
 class Add : public Judge
@@ -183,53 +198,12 @@ public:
 class Id : public Judge
 {
 public:
-	Id(Type _type, string _name) :type(_type), name(_name), Judge(Kind::ID), next(nullptr)
-	{
-		switch (_type)
-		{
-		case Type::_Bool:
-			type_name = "bool";
-			break;
-		case Type::_Int:
-			type_name = "int";
-			break;
-		case Type::_Str:
-			type_name = "string";
-			break;
-		case Type::_Float:
-			type_name = "float";
-			break;
-		case Type::_Class:
-			type_name = "Class";
-			break;
-		case Type::_Void:
-			type_name = "Void";
-			break;
-		}
+	Id(string _type, string _name) :type_name(_type), name(_name), Judge(Kind::ID), next(nullptr)
+	{ 
 	}
-	Id(Type _type, string _name,Kind _kind) :type(_type), name(_name), Judge(Kind::FUN), next(nullptr)
+	Id(string _type, string _name, Kind _kind) :type_name(_type), name(_name), Judge(Kind::FUN), next(nullptr)
 	{
-		switch (_type)
-		{
-		case Type::_Bool:
-			type_name = "bool";
-			break;
-		case Type::_Int:
-			type_name = "int";
-			break;
-		case Type::_Str:
-			type_name = "string";
-			break;
-		case Type::_Float:
-			type_name = "float";
-			break;
-		case Type::_Class:
-			type_name = "Class";
-			break;
-		case Type::_Void:
-			type_name = "Void";
-			break;
-		}
+		 
 	}
 	Type getType()
 	{
@@ -277,7 +251,7 @@ protected :
 class Function : public Id
 {
 public:
-	Function(Type _type, string _name) :Id(_type, _name, Kind::FUN), argjudge(nullptr)
+	Function(string _type, string _name) :Id(_type, _name, Kind::FUN), argjudge(nullptr)
 	{
 		 
 	}
@@ -477,9 +451,9 @@ public:
 class Value : public Judge
 {
 public:
-	Value(Type _type) :Judge(Kind::VAL), type(_type)
+	Value(string _type) :Judge(Kind::VAL), type(_type)
 	{}
-	Type type;
+	string type;
 	 
 };
 
@@ -487,7 +461,7 @@ public:
 class Str : public Value
 {
 public:
-	Str(string _value) :value(_value), Value(Type::_Str)
+	Str(string _value) :value(_value), Value("string")
 	{
 	}
 	string value;
@@ -500,11 +474,11 @@ public:
 class Int : public Value
 {
 public:
-	Int(int _value) :value(_value), Value(Type::_Int)
+	Int(int _value) :value(_value), Value("int")
 	{
 
 	}
-	Int(string _value) : value(atoi(_value.c_str())), Value(Type::_Int)
+	Int(string _value) : value(atoi(_value.c_str())), Value("int")
 	{
 
 	}
@@ -523,11 +497,11 @@ public:
 class Float : public Value
 {
 public:
-	Float(int _value) :value(_value), Value(Type::_Float)
+	Float(int _value) :value(_value), Value("float")
 	{
 
 	}
-	Float(string _value) : value(atoi(_value.c_str())), Value(Type::_Float)
+	Float(string _value) : value(atoi(_value.c_str())), Value("float")
 	{
 
 	}
@@ -546,7 +520,7 @@ public:
 class Bool : public Value
 {
 public:
-	Bool(string _value) : Value(Type::_Bool)
+	Bool(string _value) : Value("bool")
 	{
 		if (_value == "true" || _value == "True")
 		{
@@ -760,10 +734,10 @@ class Fun :public MemoryTool
 {
 public:
 	Fun* next;
-	Type type;
+	string type;
 	string id;
 	Stmt* stmt, *arglist;
-	Fun(Type _type, string _id, Stmt* _arglist, Stmt* _stmt) :type(_type), id(_id), arglist(_arglist), stmt(_stmt), next(nullptr)
+	Fun(string _type, string _id, Stmt* _arglist, Stmt* _stmt) :type(_type), id(_id), arglist(_arglist), stmt(_stmt), next(nullptr)
 	{
 		/*
 		Stmt* _arglast = arglist;
@@ -826,6 +800,10 @@ public :
 	{
 		 
 	}
+	virtual ~BaseObject()
+	{
+	
+	}
 
 	void SetFun(Fun *_fun)
 	{
@@ -840,19 +818,24 @@ public :
 				argname += arglist->getID()->getTypeName();
 				arglist = (Def *)arglist->next;
 			}
-			AddSymbol(cur->id + argname, Type::_Fun);
+			AddSymbol(cur->id + argname, "Fun");
 			cur = cur->next;
 		}
 	}
 
-	void AddSymbol(string _idname,Type type)
-	{
+
+
+	void AddSymbol(string _idname,string type)
+	{   
 		if (symbollist.find(_idname) != symbollist.end())
 		{
 		}
 		else
 		  symbollist[_idname] = type;
 	}
+
+
+
 	bool AddClass(ClassObject *_classobject)
 	{
 		if (_classobject == nullptr)
@@ -876,8 +859,7 @@ public :
 	  
 		Def * defmem = dynamic_cast<Def *>(_member);
 		
-		if (defmem != nullptr)
-			AddSymbol(defmem->getID()->getName(), defmem->getID()->getType());
+		if (defmem != nullptr)AddSymbol(defmem->getID()->getName(), defmem->getID()->getTypeName());
 	}
 	string GetClassName()
 	{
@@ -894,10 +876,17 @@ public :
 	}
 	bool isSymbol(string _name,Type type)
 	{
-		return symbollist[_name] == type;
+		return symbollist.find(_name) != symbollist.end();// && symbollist.find(_name)->second == type;
+		//return symbollist[_name] == type;
+	}
+	string SymbolType(string _name)
+	{
+		 if(symbollist.find(_name)->second=="class")return _name;
+		 return symbollist.find(_name)->second;
 	}
 
-	Type GetFunType(string _funname)const
+
+	string GetFunType(string _funname)const
 	{
 		const Fun * _fun = fun;
 		while (_fun != nullptr)
@@ -907,7 +896,7 @@ public :
 
 			_fun = _fun->next;
 		}
-		return Type::_Unknown;
+		return "unknow";
 	}
 	Classestype childs;
 	SymbolTable symbollist;
@@ -923,10 +912,15 @@ public:
 	void FunAdd(Fun * fun);
 	void SymbolAdd(string idname, Type type);
 	void ClassAdd(ClassObject*);
-	ClassObject(string _name) :BaseObject(_name)
+	ClassObject(string _name, string _pack) :BaseObject(_name), packname(_pack)
 	{
 
 	}
+	virtual ~ClassObject()
+	{
+
+	}
+
 private:
 	std::list<string> extendlist; 
 	string packname;
@@ -975,28 +969,33 @@ private:
 		}
 	}
 
-	Type typeJudge(Token* token, BaseObject * _object)
+	string typeJudge(Token* token, BaseObject * _object)
 	{
-		if (token->value == "int")
-			return Type::_Int;
+		if (token->value == "int" || token->value == "bool" || token->value == "float" || token->value == "string" || token->value=="void")
+ 
+		return token->value;
+		 
+			if (_object != nullptr&&_object->isSymbol(token->value, Type::_Class))
+				return _object->SymbolType(token->value);
+			if (isSymbol(token->value,Type::_Class))
+				return SymbolType(token->value);
+		 
+		//wait_for_debug();
+		return "unknown";//局部变量
+	}
+	string typeJudge2(string _Fatype ,Token* token, BaseObject * _object)
+	{
+		if (token->value == "int" || token->value == "bool" || token->value == "float" || token->value == "string" || token->value == "void")
 
-		else if (token->value == "bool")
-			return Type::_Bool;
-		else if (token->value == "float")
-			return Type::_Float;
-		else if (token->value == "string")
-			return Type::_Str;
-		else if (token->value == "void")
-			return Type::_Void;
-		else if (token->value == "class")
-			return Type::_Class;
+			return token->value;
 
-		else
-		{
-			ErrorLog += "this token is considered as Unknown Type" + token->toString() + "! \n";
-			//wait_for_debug();
-		
-		}return Type::_Unknown;
+		if (_object != nullptr&&_object->isSymbol(token->value, Type::_Class))
+			return token->value;
+		if (isSymbol(token->value, Type::_Class))
+			return token->value;
+
+		wait_for_debug();
+		return "unknown";
 	}
 	BaseObject * currentclass;
 	ClassObject* classparse(BaseObject * _object);
@@ -1006,16 +1005,16 @@ private:
 	Stmt*  blockParse(BaseObject * _object);
 	Stmt*  stmtsParse(BaseObject * _object);
 	Stmt*  stmtParse(BaseObject * _object);
-	Judge* judgeParse();
-	Judge* joinParse();
-	Judge* equalityParse();
-	Judge* relParse();
-	Judge* exprParse();
-	Judge* termParse();
-	Judge* unaryParse();
-	Judge* factorParse();
-	Id* classlinknParse();
-	Judge* functionParse();
+	Judge* judgeParse(BaseObject * _object);
+	Judge* joinParse(BaseObject * _object);
+	Judge* equalityParse(BaseObject * _object);
+	Judge* relParse(BaseObject * _object);
+	Judge* exprParse(BaseObject * _object);
+	Judge* termParse(BaseObject * _object);
+	Judge* unaryParse(BaseObject * _object);
+	Judge* factorParse(BaseObject * _object,string Fatype="");
+	Id* classlinknParse(BaseObject * _object);
+	Judge* functionParse(BaseObject * _object);
 	Fun*   parse(BaseObject * _object);
 	Type   FunType(string funname);
 

@@ -82,9 +82,9 @@ ClassObject* Parser::classparse(BaseObject * _object)
 		}
 		idname = token->value;
 		
-		_classobject = new ClassObject(idname);
+		_classobject = new ClassObject(idname,this->name);
 
-		_object->AddSymbol(idname, Type::_Class);
+		_object->AddSymbol(idname, "class");
 
 		token = nextToken();
 		if (token->type == Token::Type::EXTEND) //class A extend B,C,D{ }
@@ -146,7 +146,7 @@ Stmt* Parser::argParse(BaseObject * _object)
 
 	if (token->type == Token::Type::TYPE)//int, bool ,string...
 	{
-		Type type = typeJudge(token, _object);
+		string type = typeJudge(token, _object);
 		Id *id;
 		Judge *judge;
 		token = nextToken();
@@ -188,7 +188,7 @@ Fun* Parser::funParse(BaseObject * _object)
 {
 	index--;
 	Token* token = nextToken();
-	Type type;
+	string type;
 	string id;
 	Stmt* stmt    = nullptr;
 	Stmt* arglist = nullptr;
@@ -211,12 +211,13 @@ Fun* Parser::funParse(BaseObject * _object)
 	if (token->type == Token::Type::ASSIGN)
 	{
 		token = nextToken();
+		/*
 		if (token->type != type)
 		{
 			wait_for_debug();
 		}
-
-		_object->AddMember(new Def(new Id(type, id), judgeParse()));
+		*/
+		_object->AddMember(new Def(new Id(type, id), judgeParse(_object)));
 		return nullptr;
 	}
 	if (token->type == Token::Type::SEMI)
@@ -301,9 +302,10 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 
 	if (token->type == Token::Type::TYPE)//int, bool ,string...
 	{
-		Type type = typeJudge(token, _object);
-		Id *id;
-		Judge *judge;
+		string type  = typeJudge(token, _object);
+		Id *id       = nullptr;
+		Judge *judge = nullptr;
+		
 		token = nextToken();
 
 		// int id; or int id = num ;
@@ -323,7 +325,8 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 			}
 			else if (token->value == "=") //int id = 0; 
 			{
-				judge = judgeParse();
+				judge = judgeParse(_object);
+				
 				token = nextToken();
 				if (token->type != Token::Type::SEMI)
 				{
@@ -331,6 +334,7 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 					wait_for_debug();
 					return nullptr;
 				}
+				/**/
 				return new Def(id, judge);
 			}
 			else
@@ -343,19 +347,21 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 	}
 	else if (token->type == Token::Type::ID)//
 	{
-		Id *id = new Id(Type::_Unknown, token->value);
+		Id *id = new Id(typeJudge(token,_object), token->value);
 		token = nextToken();
 
 			if (token->value == "(")
 			{
 				index -= 2;//Function
-				id->setName("_fun_implicit" + id->getName());	        
-				return new Assign(id,judgeParse());
+				id->setName("_fun_implicit" + id->getName());	 
+				Judge *judge = judgeParse(_object);
+				token = nextToken();
+				return new Assign(id, judge);
 			}
 			else if (token->type == Token::Type::DOT)//id.id.id = id;
 			{
 				index--;
-				id->add(classlinknParse());
+				id->add(classlinknParse(_object));
 				token = nextToken();
 			}
 			else if (token->value!="=")
@@ -365,7 +371,7 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 				return nullptr;
 			}
 		 
-		Assign* assign = new Assign(id, judgeParse());
+			Assign* assign = new Assign(id, judgeParse(_object));
 		token = nextToken();
 
 		if (token->value != ";")
@@ -385,7 +391,7 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 			wait_for_debug();
 			return nullptr;
 		}
-		Judge * condition = judgeParse();
+		Judge * condition = judgeParse(_object);
 		token = nextToken();
 		if (token->value != ")")
 		{
@@ -433,7 +439,7 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 			return nullptr;
 		}
 
-		Judge *condition = judgeParse();
+		Judge *condition = judgeParse(_object);
 
 		token = nextToken();
 		if (token->value != ")")
@@ -456,7 +462,7 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 	//else if (token->value == "."){}
 	else
 	{
-		judgeParse();
+		judgeParse(_object);
 
 		return nullptr;
 	}
@@ -465,68 +471,65 @@ Stmt* Parser::stmtParse(BaseObject * _object)
 	return nullptr;
 }
 
-Judge* Parser::judgeParse()   //judge -> judge \| join //这是递归函数
-{                             //                | join
-	
-	
-	
-	Judge *re = joinParse();
+Judge* Parser::judgeParse(BaseObject * _object)   //judge -> judge \| join //这是递归函数
+{                             //                | join	
+	Judge *re = joinParse( _object);
 	Token *token = nextToken();
 
 	while (token->value == "|")
 	{
-		re = new Or(re, joinParse());
+		re = new Or(re, joinParse(_object));
 		token = nextToken();
 	}
 	index--;
 	return re;
 }
 
-Judge* Parser::joinParse()
+Judge* Parser::joinParse(BaseObject * _object)
 {
-	Judge *re = equalityParse();
+	Judge *re = equalityParse(  _object);
 	Token *token = nextToken();
 
 	while (token->value == "&")
 	{
-		re = new And(re, joinParse());
+		re = new And(re, joinParse(_object));
 		token = nextToken();
 	}
 	index--;
 	return re;
 }
-Judge* Parser::equalityParse()
+Judge* Parser::equalityParse(BaseObject * _object)
 {
-	Judge *re = relParse();
+	Judge *re = relParse( _object);
 	Token *token = nextToken();
 
 	while (token->value == "==" || token->value == "!=")
 	{
 		if (token->value == "==")
-			re = new Equal(re, relParse());
+			re = new Equal(re, relParse(_object));
 		else
-			re = new Not(new Equal(re, relParse()));
+			re = new Not(new Equal(re, relParse(_object)));
 
 		token = nextToken();
 	}
 	index--;
 	return re;
 }
-Judge* Parser::relParse()
+Judge* Parser::relParse(BaseObject * _object)
 {
-	Judge *re = exprParse();
+	Judge *re = exprParse(  _object);
 	Token *token = nextToken();
 
 	if (token->type == Token::Type::ROP)
 	{
 		if (token->value == ">=")
-			return new Ge(re, exprParse());
+			return new Ge(re, exprParse(_object));
 		if (token->value == ">")
-			return new G(re, exprParse());
+			return new G(re, exprParse(_object));
 		if (token->value == "<=")
-			return new Le(re, exprParse());
+			return new Le(re, exprParse(_object));
 		if (token->value == "<")
-			return new L(re, exprParse());
+			return new L(re, exprParse(_object));
 
 		ErrorLog += "parsing error :" + token->toString() + "! \n";
 		wait_for_debug();
@@ -538,63 +541,63 @@ Judge* Parser::relParse()
 		return re;
 	}
 }
-Judge* Parser::exprParse()
+Judge* Parser::exprParse(BaseObject * _object)
 {
-	Judge *re = termParse();
+	Judge *re = termParse( _object);
 	Token *token = nextToken();
 
 	while (token->value == "+" || token->value == "-")
 	{
 		if (token->value == "+")
-			re = new Add(re, termParse());
+			re = new Add(re, termParse(_object));
 		else
-			re = new Minus(re, termParse());
+			re = new Minus(re, termParse(_object));
 
 		token = nextToken();
 	}
 	index--;
 	return re;
 }
-Judge* Parser::termParse()
+Judge* Parser::termParse(BaseObject * _object)
 {
-	Judge *re = unaryParse();
+	Judge *re = unaryParse( _object);
 	Token *token = nextToken();
 
 	while (token->value == "*" || token->value == "/")
 	{
 		if (token->value == "*")
-			re = new Times(re, unaryParse());
+			re = new Times(re, unaryParse(_object));
 		else
-			re = new Division(re, unaryParse());
+			re = new Division(re, unaryParse(_object));
 
 		token = nextToken();
 	}
 	index--;
 	return re;
 }
-Judge* Parser::unaryParse()
+Judge* Parser::unaryParse(BaseObject * _object)
 {
 	Judge *re;
 	Token *token = nextToken();
 
 	if (token->value == "!")
 	{
-		re = new Not(unaryParse());
+		re = new Not(unaryParse(  _object));
 	}
 	else if (token->value == "-")
 	{
-		re = new Negative(unaryParse());
+		re = new Negative(unaryParse(  _object));
 	}
 	else
 	{
 		index--;
-		re = factorParse();
+		re = factorParse(  _object);
 	}
 	return re;
 }
 
 
-Judge* Parser::factorParse()
+Judge* Parser::factorParse(BaseObject * _object,string Fatype)
 {
 	Token *token = nextToken();
 	if (token->type == Token::Type::NUM)
@@ -615,7 +618,7 @@ Judge* Parser::factorParse()
 	}
 	else if (token->type == Token::Type::ID)
 	{
-		Function *func = new Function(typeJudge(token, nullptr),token->value);
+		Function *func = new Function(typeJudge(token, _object), token->value);
 		 
 		token = nextToken();
 		if (token->value != "(")
@@ -623,9 +626,9 @@ Judge* Parser::factorParse()
 			delete func;
 			index-=2;
 			token = nextToken();
-			Id *id = new Id(typeJudge(token, nullptr), token->value);
+			Id *id = new Id(typeJudge(token, _object), token->value);
 			
-			id->add(classlinknParse());
+			id->add(classlinknParse(_object));
 			
 			return id;
 		}
@@ -634,11 +637,14 @@ Judge* Parser::factorParse()
 		{
 			token = nextToken();
 			if (token->type == Token::Type::SEMI)
+			{
+				index--;
 				return func;
+			}
 			else if (token->type == Token::Type::DOT)
 			{
 				index--;
-				func->add(classlinknParse());
+				func->add(classlinknParse(_object));
 				return func;
 			}
 				wait_for_debug();
@@ -647,7 +653,7 @@ Judge* Parser::factorParse()
 		{   
 			index--;
 			argadd:
-			func->AddJudgeTostack(judgeParse());
+			func->AddJudgeTostack(judgeParse(_object));
 
 			token = nextToken();
 			if (token->value==",")
@@ -656,11 +662,14 @@ Judge* Parser::factorParse()
 			{
 				token = nextToken();
 				if (token->type == Token::Type::SEMI)
-					return func; 
+				{
+					index--;
+					return func;				
+				}
 				else if (token->type == Token::Type::DOT)
 				{
 					index--;
-					func->add(classlinknParse());
+					func->add(classlinknParse(_object));
 					return func;
 				}
 				else
@@ -677,7 +686,7 @@ Judge* Parser::factorParse()
 	}
 	else if (token->value == "(")
 	{
-		Judge *judge = judgeParse();
+		Judge *judge = judgeParse(_object);
 		token = nextToken();
 		if (token->value != ")")
 		{
@@ -695,20 +704,20 @@ Judge* Parser::factorParse()
 	}
 }
 
-Judge* Parser::functionParse()
+Judge* Parser::functionParse(BaseObject * _object)
 {
 	return nullptr;
 }
-Id* Parser::classlinknParse()
+Id* Parser::classlinknParse(BaseObject * _object)
 {
 	Token *token = nextToken();
 	Id *id=nullptr;
 	if (token->type == Token::Type::DOT)
 	{
 		if (id == nullptr)
-			id = (Id*)factorParse();
+			id = (Id*)factorParse(_object);
 		else
-			id->add((Id*)factorParse());
+			id->add((Id*)factorParse(_object));
 	}
 	else
 		index--;

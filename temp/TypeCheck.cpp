@@ -49,29 +49,6 @@ void TypeCheck::argCheck(Stmt* _arglist)
 
 void TypeCheck::funCheck()
 {
-   Fun* cur = fun;
-	 while (cur)//全局函数	 
-	 {
-		 string _funstart;
-		 if (cur->GetidName() == "main")
-		 {
-			 _funstart = GLOBAL;
-			 _funstart+= "_sTaRt" + cur->GetFunName();
-		 }
-		 else
-		  _funstart = GLOBAL + cur->GetFunName();
-	     
-		
-		  generate(".fundefine"+_funstart);
-
-		 argCheck(cur->arglist);
-
-		 stmtCheck(cur->stmt);
-		 generate(".functionend " + _funstart);
-		
-		 cur = cur->next;
-	 }
-
 
 	 Parser::Classestype::iterator       classit  = parser->GetChildClasses().begin();
 	 Parser::Classestype::iterator const classend = parser->GetChildClasses().end();
@@ -80,6 +57,32 @@ void TypeCheck::funCheck()
 		 classfunCheck(*classit);
 		 classit++;
 	 }
+
+	 Fun* cur = fun;
+	 while (cur)//全局函数	 
+	 {
+		 string _funstart;
+		 if (cur->GetidName() == "main")
+		 {
+			 _funstart = GLOBAL;
+			 _funstart += "_sTaRt" + cur->GetFunName();
+		 }
+		 else
+			 _funstart = GLOBAL + cur->GetFunName();
+
+
+		 generate(".fundefine" + _funstart);
+
+		 argCheck(cur->arglist);
+
+		 stmtCheck(cur->stmt);
+		 generate(".functionend " + _funstart);
+
+		 cur = cur->next;
+	 }
+
+
+
 	 generate(".fileend");
 	 close();
 	 return;
@@ -129,21 +132,21 @@ void TypeCheck::close()             //关闭文件
 {
 	in.close();
 }
-void TypeCheck::defVariable(string name, Type type)
+void TypeCheck::defVariable(string name, string type)
 {
 	defVariable2(name, type);
 	generate("store " + name);
 }
 
-void TypeCheck::defVariable2(string name, Type type)
+void TypeCheck::defVariable2(string name, string type)
 {
 	if (stackTable.top().find(name) != stackTable.top().end())
 	{
 		//重复定义了变量
-		wait_for_debug();
+	//	wait_for_debug();
 	}
 	stackTable.top()[name] = type;
-
+	/*
 	switch (type)
 	{
 	case Type::_Bool:
@@ -161,18 +164,22 @@ void TypeCheck::defVariable2(string name, Type type)
 	case Type::_Unknown:
 		generate(".unknown " + name);
 		break;
+
+	case Type::_Class:
+		generate(".class " + name);
+		break;
 	}
-	 
+	 */
 }
 
 
-void TypeCheck::assignVariable(string name, Type type)
+void TypeCheck::assignVariable(string name, string type)
 {
 	generate("store " + name);
 }
 void TypeCheck::stmtCheck(Stmt *stmt) //这是递归函数
 {
-	Type rhs;
+	string rhs;
 	bool flag = true;
 	Stmt* cur = stmt;
 	while (cur)//遍历每一个语句
@@ -187,7 +194,7 @@ void TypeCheck::stmtCheck(Stmt *stmt) //这是递归函数
 			  if (def->getJudge() != nullptr)//只是纯粹的定义，定义时没有赋值
 			  {
 				  rhs = judgeCheck(def->getJudge());//判断Judge是否合法
-				  if (id->getType() != rhs)
+				  if (id->getTypeName() != rhs)
 				  {
 					  wait_for_debug();
 				  }
@@ -215,8 +222,8 @@ void TypeCheck::stmtCheck(Stmt *stmt) //这是递归函数
 		  case Stmt::Kind::IfStmt:
 		  {
 			If *iff = static_cast<If *>(cur);
-			Type type = judgeCheck(iff->getCondition());
-			if (type != Type::_Bool)
+			string type = judgeCheck(iff->getCondition());
+			if (type != "bool")
 			{
 				wait_for_debug();
 			}
@@ -254,8 +261,8 @@ void TypeCheck::stmtCheck(Stmt *stmt) //这是递归函数
 		  {  
 			 While *wh = static_cast<While *>(cur);
 			 generate("while");
-			 Type type = judgeCheck(wh->getCondition());
-			 if (type != Type::_Bool)
+			 string type = judgeCheck(wh->getCondition());
+			 if (type != "bool")
 			 {
 				 wait_for_debug();
 			 }
@@ -273,9 +280,9 @@ void TypeCheck::stmtCheck(Stmt *stmt) //这是递归函数
 	}
 	 
 }
-Type TypeCheck::judgeCheck(Judge* judge)
+string TypeCheck::judgeCheck(Judge* judge)
 {
-	Type left, right;
+	string left, right;
 	switch (judge->kind)
 	{
 	    case Judge::Kind::ADD:
@@ -283,20 +290,20 @@ Type TypeCheck::judgeCheck(Judge* judge)
         Add *add = static_cast<Add*>(judge);
 	    left = judgeCheck(add->left);
 	    right = judgeCheck(add->right);
-	       if (left != Type::_Int || right != Type::_Int)
+		if (left != "int" || right != "int")
 		   wait_for_debug();
 	       else
 	       {
 		     generate("add");
 	       }
-	       return Type::_Int;
+	       return "int";
 	   }
 		case Judge::Kind::MINUS:
 		{
            Minus *minus = static_cast<Minus*>(judge);
 		   left = judgeCheck(minus->left);
 		   right = judgeCheck(minus->right);
-		   if (left != Type::_Int || right != Type::_Int)
+		   if (left !=  "int" || right != "int")
 		   {
 			wait_for_debug();
 		   }
@@ -304,7 +311,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		   {
 			generate("minus");
 		    }
-		   return Type::_Int; 
+		   return "int";
 		}
 		
 		case Judge::Kind::TIMES:
@@ -312,7 +319,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
            Times *times = static_cast<Times*>(judge);
 		   left = judgeCheck(times->left);
 		   right = judgeCheck(times->right);
-		   if (left != Type::_Int || right != Type::_Int)
+		   if (left != "int" || right != "int")
 		   {
 			wait_for_debug();
 		   }
@@ -320,7 +327,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 	       {
 			generate("times");
 		   }
-		   return Type::_Int; 	
+		   return "int";
 		}
 
 		case Judge::Kind::DIVISION:
@@ -328,7 +335,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 	      Division *division = static_cast<Division*>(judge);
 		  left = judgeCheck(division->left);
 		  right = judgeCheck(division->right);
-		  if (left != Type::_Int || right != Type::_Int)
+		  if (left != "int" || right != "int")
 		  {
 			wait_for_debug();
 		  }
@@ -336,7 +343,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		  {
 			generate("division");
 		   }
-		 return Type::_Int; 
+		  return "int";
 		}
 
 		 case Judge::Kind::GE:
@@ -344,7 +351,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
           Ge *ge = static_cast<Ge*>(judge);
 		  left = judgeCheck(ge->left);
 		  right = judgeCheck(ge->right);
-		  if (left != Type::_Int || right != Type::_Int)
+		  if (left != "int" || right != "int")
 		  {
 			wait_for_debug();
 		   }
@@ -352,7 +359,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		  {
 			generate("ge");
 		   }
-		   return Type::_Bool; 
+		   return "bool"; 
 		 }
 
 		case Judge::Kind::LE:
@@ -360,7 +367,7 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		  Le *le = static_cast<Le*>(judge);
 		  left = judgeCheck(le->left);
 		  right = judgeCheck(le->right);
-		 if (left != Type::_Int || right != Type::_Int)
+		 if (left != "int" || right != "int")
 		  {
 			wait_for_debug();
 		  }
@@ -368,14 +375,14 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		  {
 			generate("le");
 		  }
-		  return Type::_Bool; 
+		 return "bool";
 		}
 
 		case Judge::Kind::G:
 		{G *g = static_cast<G*>(judge);
 		left = judgeCheck(g->left);
 		right = judgeCheck(g->right);
-		if (left != Type::_Int || right != Type::_Int)
+		if (left != "int" || right != "int")
 		{
 			wait_for_debug();
 		}
@@ -383,12 +390,13 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("g");
 		}
-		return Type::_Bool; }
+		return "bool"; 
+		}
 		case Judge::Kind::L:
 		{L *l = static_cast<L*>(judge);
 		left = judgeCheck(l->left);
 		right = judgeCheck(l->right);
-		if (left != Type::_Int || right != Type::_Int)
+		if (left != "int" || right != "int")
 		{
 			wait_for_debug();
 		}
@@ -396,7 +404,8 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("l");
 		}
-		return Type::_Bool; }
+		return "bool"; 
+		}
 		case Judge::Kind::EQUAL:
 		{
 		Equal *equal = static_cast<Equal*>(judge);
@@ -410,13 +419,13 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("equal");
 		}
-		return Type::_Bool; 
+		return "bool";
 		}
 		case Judge::Kind::AND:
 		{And *and = static_cast<And*>(judge);
 		left = judgeCheck(and->left);
 		right = judgeCheck(and->right);
-		if (left != Type::_Bool || right != Type::_Bool)
+		if (left != "bool" || right != "bool")
 		{
 			wait_for_debug();
 		}
@@ -424,12 +433,13 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("and");
 		}
-		return Type::_Bool; }
+		return "bool"; 
+		}
 		case Judge::Kind::OR:
 		{Or *or = static_cast<Or*>(judge);
 		left = judgeCheck(or->left);
 		right = judgeCheck(or->right);
-		if (left != Type::_Bool || right != Type::_Bool)
+		if (left != "bool" || right != "bool")
 		{
 			wait_for_debug();
 		}
@@ -437,11 +447,11 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("or");
 		}
-		return Type::_Bool; }
+		return "bool";  }
 		case Judge::Kind::NEGATIVE:
 		{Negative *negative = static_cast<Negative*>(judge);
 		right = judgeCheck(negative->follow);
-		if (right != Type::_Int)
+		if (right != "int")
 		{
 			wait_for_debug();
 		}
@@ -449,12 +459,12 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("negative");
 		}
-		return Type::_Int; }
+		return "int"; }
 
 		case Judge::Kind::NOT:
 		{Not *not = static_cast<Not*>(judge);
 		right = judgeCheck(not->follow);
-		if (right != Type::_Bool)
+		if (right != "bool")
 		{
 			wait_for_debug();
 		}
@@ -462,18 +472,35 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		{
 			generate("not");
 		}
-		return Type::_Bool;
+		return "bool";
 		}
 
 		case Judge::Kind::ID:
 		{
 		  Id *id = static_cast<Id*>(judge);
+		  
 		  generate("load " + id->getName());
 
 		  if (stackTable.top().find(id->getName()) == stackTable.top().end())
 		  {
 			   wait_for_debug();//没有定义变量
 		  }
+		  
+		  if (id->getNext() != nullptr)
+		  {   //全局变量
+			  if (stackTable.top().find(id->getName()) == stackTable.top().end())
+			  {
+				  
+				  
+			  }
+			  else//局部变量
+			  {
+
+			  }
+		  }
+
+
+
 		  if (id->getNext() != nullptr)
 			  return judgeCheck(id->getNext());
 		  else
@@ -491,8 +518,8 @@ Type TypeCheck::judgeCheck(Judge* judge)
 		  string argname="";
 		  while (!argstack.empty())
 		  {
-			  Type result = judgeCheck(argstack.top()); argstack.pop();
-			  argname += GetTypeString(result);
+			  string result = judgeCheck(argstack.top()); argstack.pop();
+			  argname +=  (result);
 		  }
 
 		  if (parser->isSymbol(func->getidName() + argname, Type::_Fun))

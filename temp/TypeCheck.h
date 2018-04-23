@@ -30,7 +30,7 @@ public:
 	
 		in.open("./out.txt"); //ios::trunc表示在打开文件前将文件清空,由于是写入,文件不存在则创建
 
-		map<string, Type> st;
+		map<string, string> st;
 	 
 		stackTable.push(st);
 
@@ -51,7 +51,7 @@ public:
 
 
 //private:
-	typedef stack<map<string, Type>  > StackTable;
+	typedef stack<map<string, string>  > StackTable;
 	Fun* fun;
 	StackTable stackTable;//每个栈空间代表的是一个作用域，每个作用域有一个符号表，这个表用map来实现，里面是定义的变量，每定义一个变量会检查表里面有没有定义过。
 	ofstream in;
@@ -61,11 +61,11 @@ public:
 	
 	void generate(string str);//输出至文件
 	void close();             //关闭文件
-	void defVariable(string name, Type type);
-	void defVariable2(string name, Type type);
-	void assignVariable(string name, Type type);
+	void defVariable(string name, string type);
+	void defVariable2(string name, string type);
+	void assignVariable(string name, string type);
 	void stmtCheck(Stmt *stmt) ;
-	Type judgeCheck(Judge* judge);
+	string judgeCheck(Judge* judge);
 	void genwithoutendl(string str);
 	void argCheck(Stmt* _arglist)  ;
 };
