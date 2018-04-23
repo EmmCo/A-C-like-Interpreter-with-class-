@@ -15,7 +15,7 @@ This is a interpreter based on C++, inputing source code ( C with class ) for in
 - [x] 03/28/2018 Complete Memory manager and Garbage collect system--->MemoryManager.cpp 
                                                                    --->MarkSweep.cpp
 ---------------------
-- [x] 04/5/2018  Start work for Object-oriented
-- [x] 04/10/2018 Complete Encapsulation of object-oriented
-- [x] 04/20/2018 Complete Polymorphism  of object-oriented（80%）
-- [ ] 04/30/2018 Complete Inheritance of object-oriented  （10%）
+- [x] 04/5/2018  Start work for supporting Object-oriented
+- [x] 04/10/2018 Complete supporting for Encapsulation of object-oriented
+- [x] 04/20/2018 Complete supporting for Polymorphism of object-oriented（80%）
+- [ ] 04/30/2018 Complete supporting for Inheritance of object-oriented （10%）
