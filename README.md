@@ -2,7 +2,7 @@
 
 IDE -->MicroSoft Visual Studio 2013
 
-This is a interpreter based on C++, inputing source code ( C with class ) for interpretation and execution, use DFA to construct lexical analyzer to get word Token, then use recursive descent method to generate syntax analysis tree, and then generate target assembler code by type check, and finally get the final calculation result by the stack machine analysis target assembly code.The memory manager is used for memory allocation, and memory allocation records are output. Mark&Sweep is used to garbage collect.
+This is a interpreter based on C++, inputing source code ( C with class ) for interpretation and execution, use DFA to construct lexical analyzer to get word Token, then use recursive descent method to generate syntax analysis tree, and then generate target assembler code by type check system, and finally get the final calculation result by the stack machine analysising target assembly code.The memory manager is used for memory allocation, and memory allocation records are output. Mark&Sweep is used to garbage collect.
 
 
 
@@ -10,8 +10,8 @@ This is a interpreter based on C++, inputing source code ( C with class ) for in
 - [x] 03/2/2018  Start work
 - [x] 03/4/2018  Complete Lexical analyzer     ---> Lexer.cpp
 - [x] 03/7/2018  Complete Syntax analysis Tree ---> ast.cpp
-- [x] 03/18/2018 Complete Generate target assembler code by type check ---> TypeCheck.cpp
-- [x] 03/22/2018 Complete Stack machine analysis target assembly code--->StcakMachine.cpp
+- [x] 03/18/2018 Complete Generating target assembler code by type check--> TypeCheck.cpp
+- [x] 03/22/2018 Complete Stack machine analysis assembly code     --->StcakMachine.cpp
 - [x] 03/28/2018 Complete Memory manager and Garbage collect system--->MemoryManager.cpp 
                                                                    --->MarkSweep.cpp
 ---------------------
