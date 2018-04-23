@@ -1,8 +1,8 @@
-# A-C-like-Interpreter-with-class. This is a interpreter based on C++, input source code( C with class ) interpretation and execution
+# A-C-like-Interpreter-with-class. This is a interpreter based on C++, inputing source code ( C with class ) for interpretation and execution
 
 IDE -->MicroSoft Visual Studio 2013
 
-This is a interpreter based on C++, input source code( C with class ) interpretation and execution, use DFA to construct lexical analyzer to get word Token, then use recursive descent method to generate syntax analysis tree, and then generate target assembler code by type check, and finally get the final calculation result by the stack machine analysis target assembly code.The memory manager is used for memory allocation, and memory allocation records are output. Mark&Sweep is used to garbage collect.
+This is a interpreter based on C++, inputing source code ( C with class ) for interpretation and execution, use DFA to construct lexical analyzer to get word Token, then use recursive descent method to generate syntax analysis tree, and then generate target assembler code by type check, and finally get the final calculation result by the stack machine analysis target assembly code.The memory manager is used for memory allocation, and memory allocation records are output. Mark&Sweep is used to garbage collect.
 
 
 
