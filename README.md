@@ -1,4 +1,4 @@
-# A-C-like-Interpreter-with-class
+# A-C-like-Interpreter-with-class. This is a interpreter based on C++, input source code( C with class ) interpretation and execution
 
 IDE -->MicroSoft Visual Studio 2013
 
